@@ -1,0 +1,41 @@
+---
+title: "DASHBOARD SOBRE LA METEOROLOGIA EN CANARIAS"
+author: "Juan Carlos García Estupiñán"
+date: '2024'
+output: 
+    flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    source_code: embed
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE, warning=FALSE, include=FALSE, message=FALSE}
+source("code/meteorologia_analysis.R")
+library(flexdashboard)
+library(plotly)
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+### Gráfico para la precipitación por mes. 
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+ggplotly(precipitaciones_plot) %>% 
+  layout(showlegend = FALSE)
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Gráfico para la temperatura promedio por mes
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+ggplotly(temperatura_plot) %>% 
+  layout(showlegend = FALSE)
+```

@@ -15,27 +15,39 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r echo=FALSE, warning=FALSE, include=FALSE, message=FALSE}
 source("code/meteorologia_analysis.R")
+source("code/mapa_canarias.R")
 library(flexdashboard)
 library(plotly)
 ```
 
 
-Row
+Column {data-width=800}
 -----------------------------------------------------------------------
 
-### Gráfico para la precipitación por mes. 
+### **Mapa de las estaciones meteorológicas de Canarias para los datos el último mes (Datos públicos de GRAPHCAN)**
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, out.width = '100%'}
+map
+```
+
+Column 
+-----------------------------------------------------------------------
+
+### **Gráfico para la precipitación por mes.** 
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
-ggplotly(precipitaciones_plot) %>% 
+ggplotly(precipitaciones_plot, tooltip = "text") %>% 
   layout(showlegend = FALSE)
 ```
 
-Row
------------------------------------------------------------------------
 
-### Gráfico para la temperatura promedio por mes
+### **Gráfico para la temperatura promedio por mes**
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
-ggplotly(temperatura_plot) %>% 
+ggplotly(temperatura_plot, tooltip = "text") %>% 
   layout(showlegend = FALSE)
 ```
+
+
+
+

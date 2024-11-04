@@ -33,9 +33,9 @@ precipitaciones_plot <- datos_estaciones %>%
                        "Abr.", "May.", "Jun.",
                        "Jul.", "Ago.", "Sep.",
                        "Oct.", "Nov.", "Dic.")) +
-  scale_color_manual(values = c("#808080", "red")) +
+  scale_color_manual(values = c("white", "red")) +
   labs(
-    title = glue("Precipitación acumulada para el <span style='color: red'><i>{anio_actual}</i></span> frente al <span style='color: gray'><i>resto de años</i></span> y su <span style='color: #5680FF'><i>promedio</i></span>"),
+    title = glue("Precipitación acumulada para el <span style='color: red'><i>{anio_actual}</i></span> frente al <span style='color: white'><i>resto de años</i></span> y su <span style='color: #5680FF'><i>promedio</i></span>"),
     x = "Meses del año",
     y = "Precipitación acumulada (mm) x 10<sup>3</sup>"
   ) +
@@ -44,7 +44,7 @@ precipitaciones_plot <- datos_estaciones %>%
     plot.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"),
     panel.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"),
     panel.grid = element_line(color = "white", linetype = "dashed"),
-    plot.title = element_markdown(face = "bold", size = 11, color = "white"),
+    plot.title = element_markdown(face = "bold", size = 11, color = "lightgray"),
     axis.title = element_markdown(face = "bold", color = "white"),
     axis.text = element_text(color = "lightgray")
   )
@@ -74,9 +74,9 @@ temperatura_plot <- datos_estaciones %>%
                        "Abr.", "May.", "Jun.",
                        "Jul.", "Ago.", "Sep.",
                        "Oct.", "Nov.", "Dic.")) +
-  scale_color_manual(values = c("#808080", "red")) +
+  scale_color_manual(values = c("white", "red")) +
   labs(
-    title = glue("Temperatura del aire promedio para el <span style='color: red'><i>{anio_actual}</i></span> frente al <span style='color: gray'><i>resto de años</i></span> y su <span style='color: #5680FF'><i>promedio</i></span>"),
+    title = glue("Temperatura del aire promedio para el <span style='color: red'><i>{anio_actual}</i></span> frente al <span style='color: white'><i>resto de años</i></span> y su <span style='color: #5680FF'><i>promedio</i></span>"),
     x = "Meses del año",
     y = "Temperatura (ºC)"
   ) +
@@ -85,7 +85,7 @@ temperatura_plot <- datos_estaciones %>%
     plot.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"),
     panel.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"), 
     panel.grid = element_line(color = "white", linetype = "dashed"),
-    plot.title = element_markdown(face = "bold", size = 11, color = "white"),
+    plot.title = element_markdown(face = "bold", size = 11, color = "lightgray"),
     axis.title = element_markdown(face = "bold", color = "white"),
     axis.text = element_text(color = "lightgray")
   )

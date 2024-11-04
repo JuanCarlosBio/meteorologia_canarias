@@ -35,12 +35,15 @@ precipitaciones_plot <- datos_estaciones %>%
                        "Oct.", "Nov.", "Dic.")) +
   scale_color_manual(values = c("white", "red")) +
   labs(
-    title = glue("Precipitación acumulada para el <span style='color: red'><i>{anio_actual}</i></span> frente al <span style='color: white'><i>resto de años</i></span> y su <span style='color: #5680FF'><i>promedio</i></span>"),
+    title = glue("Precipitación acumulada para el <span style='color: red'><i>{anio_actual}</i></span> frente al <span style='color: white'><i>resto de años</i></span> y su <span style='color: #5680FF'><i>tendencia</i></span>"),
     x = "Meses del año",
     y = "Precipitación acumulada (mm) x 10<sup>3</sup>"
   ) +
   theme_minimal() +
   theme(
+    panel.grid.major = element_line(color = "gray",
+                                    linewidth = 0.5,
+                                    linetype = 2),
     plot.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"),
     panel.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"),
     panel.grid = element_line(color = "white", linetype = "dashed"),
@@ -76,12 +79,15 @@ temperatura_plot <- datos_estaciones %>%
                        "Oct.", "Nov.", "Dic.")) +
   scale_color_manual(values = c("white", "red")) +
   labs(
-    title = glue("Temperatura del aire promedio para el <span style='color: red'><i>{anio_actual}</i></span> frente al <span style='color: white'><i>resto de años</i></span> y su <span style='color: #5680FF'><i>promedio</i></span>"),
+    title = glue("Temperatura del aire promedio para el <span style='color: red'><i>{anio_actual}</i></span> frente al <span style='color: white'><i>resto de años</i></span> y su <span style='color: #5680FF'><i>tendencia</i></span>"),
     x = "Meses del año",
     y = "Temperatura (ºC)"
   ) +
   theme_minimal() +
   theme(
+    panel.grid.major = element_line(color = "gray",
+                                    linewidth = 0.5,
+                                    linetype = 2),
     plot.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"),
     panel.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"), 
     panel.grid = element_line(color = "white", linetype = "dashed"),

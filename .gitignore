@@ -3,7 +3,6 @@ data/*
 
 tasks/
 
-plots/
 # History files
 .Rhistory
 .Rapp.history

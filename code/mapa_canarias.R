@@ -13,6 +13,7 @@ datos_estaciones <- read_csv(glue("data/processed/{lista_estaciones}"))
 municipios_canarias <- read_sf("data/islands_shp/municipios.shp") %>%
   mutate(geometry = st_transform(geometry, crs = 4326))
 
+
 datos_espaciales <- left_join(metadata_estaciones, datos_estaciones, by = "thing_id") %>%
   select(thing_id, location_description, location_coordinates, datastream_name, year, month, result) %>%
   mutate(month = factor(month,
@@ -23,7 +24,7 @@ datos_espaciales <- left_join(metadata_estaciones, datos_estaciones, by = "thing
                                    "octubre", "noviembre", "diciembre")))
 
 sf_precipitaciones <- datos_espaciales %>% 
-  filter(str_detect(datastream_name, "Rain") & year == year(today()) & month == month %>% tail(n=1)) %>%
+  filter(str_detect(datastream_name, "Rain")) %>%
   group_by(
     location_description, 
     datastream_name, 
@@ -32,27 +33,65 @@ sf_precipitaciones <- datos_espaciales %>%
     location_coordinates
     ) %>%
   summarise(sum_precipitation = round(sum(result, na.rm = TRUE), 2)) %>%
-  mutate(location_coordinates = st_as_sfc(location_coordinates, crs = 4326)) %>%
-  st_as_sf()  %>%
+  ungroup() %>%
+  group_by(
+    location_description, 
+    datastream_name, 
+    month, 
+    location_coordinates
+    ) %>% 
+  mutate(mean_rain = mean(sum_precipitation),
+         variation_rain = round((sum_precipitation - mean_rain),2),
+         location_coordinates = st_as_sfc(location_coordinates, crs = 4326)) %>%
+  ungroup() %>%
+  arrange(
+    location_description, 
+    datastream_name, 
+    year, 
+    month, 
+    location_coordinates
+    ) %>%
+  filter(year == year(today()) & month == month %>% tail(n=1)) %>% 
+  st_as_sf() %>%
   mutate(
     lon = st_coordinates(location_coordinates)[, 1], # Longitude (X)
     lat = st_coordinates(location_coordinates)[, 2]  # Latitude (Y)
   )
 
 sf_avg_temperature <- datos_espaciales %>% 
-  filter(str_detect(datastream_name, "Air temperature") & year == year(today()) & month == month %>% tail(n=1)) %>% 
-  group_by(    location_description, 
+  filter(str_detect(datastream_name, "Air temperature") ) %>% 
+  group_by(
+    location_description, 
     datastream_name, 
     year, 
     month, 
     location_coordinates
-) %>% 
-summarise(avg_temperature = round(mean(result, na.rm = TRUE), 2)) %>%
-ungroup() %>%
-mutate(datastream_name = tolower(str_replace_all(datastream_name, pattern = " ", replacement = "_")),
-       datastream_name = tolower(str_replace_all(datastream_name, pattern = "[\\(\\)\\.]", replacement = ""))) %>%  
-pivot_wider(names_from = "datastream_name", values_from = "avg_temperature") %>%
-  mutate(location_coordinates = st_as_sfc(location_coordinates, crs = 4326)) %>%
+  ) %>% 
+  summarise(avg_temperature = round(mean(result, na.rm = TRUE), 2)) %>%
+  ungroup() %>%
+  mutate(datastream_name = tolower(str_replace_all(datastream_name, pattern = " ", replacement = "_")),
+         datastream_name = tolower(str_replace_all(datastream_name, pattern = "[\\(\\)\\.]", replacement = ""))) %>%  
+  ungroup() %>%
+  group_by(
+    location_description, 
+    datastream_name, 
+    month, 
+    location_coordinates
+  ) %>%   
+  mutate(
+    mean_temp_years = mean(avg_temperature),
+    variation_temp_years = round((avg_temperature - mean_temp_years),2),
+    location_coordinates = st_as_sfc(location_coordinates, crs = 4326)) %>%
+  select(-mean_temp_years) %>%
+  pivot_wider(names_from = "datastream_name", values_from = c("avg_temperature", "variation_temp_years")) %>% 
+  ungroup() %>% 
+  arrange(
+    location_description, 
+    year, 
+    month, 
+    location_coordinates
+    ) %>%
+  filter(year == year(today()) & month == month %>% tail(n=1)) %>%   
   st_as_sf()  %>%
   mutate(
     lon = st_coordinates(location_coordinates)[, 1], # Longitude (X)
@@ -65,7 +104,7 @@ pal_prep <- colorNumeric(
 )
 
 bins <- c(0, 10, 20, 30, Inf)
-pal_temp <- colorBin("YlOrRd", domain = sf_avg_temperature$air_temperature_avg, bins = bins)
+pal_temp <- colorBin("YlOrRd", domain = sf_avg_temperature$avg_temperature_air_temperature_avg, bins = bins)
 
 map <- leaflet() %>%
   setView(-15.8, 28.4, zoom = 8)  %>% 
@@ -85,8 +124,8 @@ map <- leaflet() %>%
       "<p align='left'>",
       glue("<strong>Central</strong>: <i>{sf_precipitaciones$location_description}</i><br>"),
       "----<br>",
-      glue("Datos del mes de <strong>{sf_precipitaciones$month}</strong> del año <strong>{sf_precipitaciones$year}</strong>:<br>"),
-      glue("<strong>Precipitación acumulada</strong>: <u>{sf_precipitaciones$sum_precipitation} mm</u>"),
+      glue("Datos del mes de <strong>{sf_precipitaciones$month}</strong> del año <strong>{sf_precipitaciones$year} y su variación con respecto a los años</strong>:<br>"),
+      glue("<strong>Precipitación acumulada</strong>: <u>{sf_precipitaciones$sum_precipitation} mm</u> ((<span style='color:{ifelse(sf_precipitaciones$variation_rain >= 0, 'green', 'red')}'>{sf_precipitaciones$variation_rain}</span> mm)"),
       "</p>" 
     ) %>% lapply(htmltools::HTML),
     label = paste0(
@@ -99,7 +138,7 @@ map <- leaflet() %>%
   ) %>%
   addCircleMarkers(
     data = sf_avg_temperature, 
-    fillColor = ~pal_temp(air_temperature_avg),
+    fillColor = ~pal_temp(avg_temperature_air_temperature_avg),
     weight = .3,
     fillOpacity = 1,
     radius = 10,
@@ -107,10 +146,10 @@ map <- leaflet() %>%
       "<p align='left'>",
       glue("<strong>Central</strong>: <i>{sf_avg_temperature$location_description}</i><br>"),
       "----<br>",
-      glue("Datos del mes de <strong>{sf_avg_temperature$month}</strong> del año <strong>{sf_avg_temperature$year}</strong>:<br>"),
-      glue("<strong>Temperatura mínima</strong>: <u>{sf_avg_temperature$air_temperature_min} ºC</u><br>"),
-      glue("<strong>Temperatura promedio</strong>: <u>{sf_avg_temperature$air_temperature_avg} ºC</u><br>"),
-      glue("<strong>Temperatura máxima</strong>: <u>{sf_avg_temperature$air_temperature_max} ºC</u><br>"),
+      glue("Datos del mes de <strong>{sf_avg_temperature$month}</strong> del año <strong>{sf_avg_temperature$year} y su variación promedio (respecto a los años)</strong>:<br>"),
+      glue("<strong>Temperatura mínima</strong>:   <u>{sf_avg_temperature$avg_temperature_air_temperature_min} ºC</u> (<span style='color:{ifelse(sf_avg_temperature$variation_temp_years_air_temperature_min >= 0, 'green', 'red')}'>{sf_avg_temperature$variation_temp_years_air_temperature_min} ºC</span>)<br>"),
+      glue("<strong>Temperatura promedio</strong>: <u>{sf_avg_temperature$avg_temperature_air_temperature_avg} ºC</u> (<span style='color:{ifelse(sf_avg_temperature$variation_temp_years_air_temperature_avg >= 0, 'green', 'red')}'>{sf_avg_temperature$variation_temp_years_air_temperature_avg} ºC</span>)<br>"),
+      glue("<strong>Temperatura máxima</strong>:   <u>{sf_avg_temperature$avg_temperature_air_temperature_max} ºC</u> (<span style='color:{ifelse(sf_avg_temperature$variation_temp_years_air_temperature_max >= 0, 'green', 'red')}'>{sf_avg_temperature$variation_temp_years_air_temperature_max} ºC</span>)"),
       "</p>" 
     ) %>% lapply(htmltools::HTML),
     label = paste0(
@@ -137,7 +176,7 @@ map <- leaflet() %>%
   addLegend(
     data = sf_avg_temperature,
     pal = pal_temp,
-    values = ~air_temperature_avg,
+    values = ~avg_temperature_air_temperature_avg,
     title = paste0(
       "<p align='left'>",
       "Leyenda<br>Temp. Promedio",

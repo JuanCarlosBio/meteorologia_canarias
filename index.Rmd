@@ -16,10 +16,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r echo=FALSE, warning=FALSE, include=FALSE, message=FALSE}
 source("code/meteorologia_analysis.R")
 source("code/mapa_canarias.R")
+source("code/summary_table.R")
 library(flexdashboard)
 library(plotly)
 ```
 
+
+GRÁFICAS
+=======================================================================
 
 Column {data-width=800}
 -----------------------------------------------------------------------
@@ -29,6 +33,8 @@ Column {data-width=800}
 ```{r, echo = FALSE, message = FALSE, warning=FALSE, out.width = '100%'}
 map
 ```
+
+
 
 Column 
 -----------------------------------------------------------------------
@@ -49,5 +55,9 @@ ggplotly(temperatura_plot, tooltip = "text") %>%
 ```
 
 
+TABLAS
+=======================================================================
 
-
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+gt_table
+```

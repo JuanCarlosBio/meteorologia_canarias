@@ -44,14 +44,12 @@ sf_precipitaciones <- datos_espaciales %>%
          variation_rain = round((sum_precipitation - mean_rain),2),
          location_coordinates = st_as_sfc(location_coordinates, crs = 4326)) %>%
   ungroup() %>%
+  filter(year == year(today())) %>%
   arrange(
-    location_description, 
-    datastream_name, 
     year, 
     month, 
-    location_coordinates
     ) %>%
-  filter(year == year(today()) & month == month %>% tail(n=1)) %>% 
+  filter(month == month %>% tail(n=1)) %>% 
   st_as_sf() %>%
   mutate(
     lon = st_coordinates(location_coordinates)[, 1], # Longitude (X)
@@ -86,10 +84,8 @@ sf_avg_temperature <- datos_espaciales %>%
   pivot_wider(names_from = "datastream_name", values_from = c("avg_temperature", "variation_temp_years")) %>% 
   ungroup() %>% 
   arrange(
-    location_description, 
     year, 
     month, 
-    location_coordinates
     ) %>%
   filter(year == year(today()) & month == month %>% tail(n=1)) %>%   
   st_as_sf()  %>%
@@ -105,6 +101,19 @@ pal_prep <- colorNumeric(
 
 bins <- c(0, 10, 20, 30, Inf)
 pal_temp <- colorBin("YlOrRd", domain = sf_avg_temperature$avg_temperature_air_temperature_avg, bins = bins)
+
+## Resumir nombre de las variables:
+## Precipitaciones
+sum_precip <- sf_precipitaciones$sum_precipitation
+var_precip <- sf_precipitaciones$variation_rain 
+## Temperatura 
+temp_air_min <- sf_avg_temperature$avg_temperature_air_temperature_min
+temp_air_avg <- sf_avg_temperature$avg_temperature_air_temperature_avg
+temp_air_max <- sf_avg_temperature$avg_temperature_air_temperature_max
+
+var_air_min <- sf_avg_temperature$variation_temp_years_air_temperature_min
+var_air_avg <- sf_avg_temperature$variation_temp_years_air_temperature_avg
+var_air_max <- sf_avg_temperature$variation_temp_years_air_temperature_max
 
 map <- leaflet() %>%
   setView(-15.8, 28.4, zoom = 8)  %>% 
@@ -125,7 +134,7 @@ map <- leaflet() %>%
       glue("<strong>Central</strong>: <i>{sf_precipitaciones$location_description}</i><br>"),
       "----<br>",
       glue("Datos del mes de <strong>{sf_precipitaciones$month}</strong> del año <strong>{sf_precipitaciones$year} y su variación con respecto a los años</strong>:<br>"),
-      glue("<strong>Precipitación acumulada</strong>: <u>{sf_precipitaciones$sum_precipitation} mm</u> ((<span style='color:{ifelse(sf_precipitaciones$variation_rain >= 0, 'green', 'red')}'>{sf_precipitaciones$variation_rain}</span> mm)"),
+      glue("<strong>Precipitación acumulada</strong>: <u>{sum_precip} mm</u> (<span style='color:{ifelse(var_precip >= 0, 'green', 'red')}'>{ifelse(var_precip >= 0, paste0('+', var_precip), var_precip)}</span> mm)"),
       "</p>" 
     ) %>% lapply(htmltools::HTML),
     label = paste0(
@@ -147,9 +156,9 @@ map <- leaflet() %>%
       glue("<strong>Central</strong>: <i>{sf_avg_temperature$location_description}</i><br>"),
       "----<br>",
       glue("Datos del mes de <strong>{sf_avg_temperature$month}</strong> del año <strong>{sf_avg_temperature$year} y su variación promedio (respecto a los años)</strong>:<br>"),
-      glue("<strong>Temperatura mínima</strong>:   <u>{sf_avg_temperature$avg_temperature_air_temperature_min} ºC</u> (<span style='color:{ifelse(sf_avg_temperature$variation_temp_years_air_temperature_min >= 0, 'green', 'red')}'>{sf_avg_temperature$variation_temp_years_air_temperature_min} ºC</span>)<br>"),
-      glue("<strong>Temperatura promedio</strong>: <u>{sf_avg_temperature$avg_temperature_air_temperature_avg} ºC</u> (<span style='color:{ifelse(sf_avg_temperature$variation_temp_years_air_temperature_avg >= 0, 'green', 'red')}'>{sf_avg_temperature$variation_temp_years_air_temperature_avg} ºC</span>)<br>"),
-      glue("<strong>Temperatura máxima</strong>:   <u>{sf_avg_temperature$avg_temperature_air_temperature_max} ºC</u> (<span style='color:{ifelse(sf_avg_temperature$variation_temp_years_air_temperature_max >= 0, 'green', 'red')}'>{sf_avg_temperature$variation_temp_years_air_temperature_max} ºC</span>)"),
+      glue("<strong>Temperatura mínima</strong>:   <u>{temp_air_min} ºC</u> (<span style='color:{ifelse(var_air_min >= 0, 'red', 'blue')}'>{ifelse(var_air_min >= 0, paste0('+', var_air_min), var_air_min)} ºC</span>)<br>"),
+      glue("<strong>Temperatura promedio</strong>: <u>{temp_air_avg} ºC</u> (<span style='color:{ifelse(var_air_avg >= 0, 'red', 'blue')}'>{ifelse(var_air_avg >= 0, paste0('+', var_air_avg), var_air_avg)} ºC</span>)<br>"),
+      glue("<strong>Temperatura máxima</strong>:   <u>{temp_air_max} ºC</u> (<span style='color:{ifelse(var_air_max >= 0, 'red', 'blue')}'>{ifelse(var_air_max >= 0, paste0('+', var_air_max), var_air_max)} ºC</span>)"),
       "</p>" 
     ) %>% lapply(htmltools::HTML),
     label = paste0(

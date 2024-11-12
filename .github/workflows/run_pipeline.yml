@@ -1,9 +1,9 @@
 name: Ejecutar Snakemake workflow de especies de Gran Canaria
 run-name: ${{ github.actor }} Está ejecutando Snakemake workflow 🚀
 on: 
-  [push]
-  # schedule:
-  #   - cron: '0 0 1 * *'
+  #[push]
+   schedule:
+     - cron: '0 0 1 * *'
 jobs:
   ejecutar--snakemake-workflow-especies-gc:
     runs-on: ubuntu-latest
@@ -35,6 +35,6 @@ jobs:
       - name: Commit changes to repository
         run: |
           git add index.html
-          git commit -m "Actualización semanal completada"
+          git commit -m "Actualización mensual completada"
           git push origin main
       - run: echo "🍏 This job's status is ${{ job.status }}."

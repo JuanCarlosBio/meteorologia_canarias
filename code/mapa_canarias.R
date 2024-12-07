@@ -99,8 +99,18 @@ pal_prep <- colorNumeric(
   domain = sf_precipitaciones$sum_precipitation
 )
 
+pal_varprep <- colorNumeric(
+  palette = "RdYlGn",
+  domain = sf_precipitaciones$variation_rain
+)
+
 bins <- c(0, 10, 20, 30, Inf)
 pal_temp <- colorBin("YlOrRd", domain = sf_avg_temperature$avg_temperature_air_temperature_avg, bins = bins)
+
+pal_var_avgtemp <- colorNumeric(
+  palette = c("blue", "white", "red"),
+  domain = sf_avg_temperature$variation_temp_years_air_temperature_avg
+)
 
 ## Resumir nombre de las variables:
 ## Precipitaciones
@@ -146,6 +156,28 @@ map <- leaflet() %>%
     group = "Precipitaciones" 
   ) %>%
   addCircleMarkers(
+    data = sf_precipitaciones, 
+    fillColor = ~pal_varprep(variation_rain),
+    weight = .3,
+    fillOpacity = 1,
+    radius = 10,
+    popup = paste0(
+      "<p align='left'>",
+      glue("<strong>Central</strong>: <i>{sf_precipitaciones$location_description}</i><br>"),
+      "----<br>",
+      glue("Datos del mes de <strong>{sf_precipitaciones$month}</strong> del año <strong>{sf_precipitaciones$year} y su variación con respecto a los años</strong>:<br>"),
+      glue("<strong>Precipitación acumulada</strong>: <u>{sum_precip} mm</u> (<span style='color:{ifelse(var_precip >= 0, 'green', 'red')}'>{ifelse(var_precip >= 0, paste0('+', var_precip), var_precip)}</span> mm)"),
+      "</p>" 
+    ) %>% lapply(htmltools::HTML),
+    label = paste0(
+      "<p align='left'>",
+      "<strong>Nombre de la central:</strong><br>",
+      glue("<i><u>{sf_precipitaciones$location_description}</u></i>"),
+      "</>"
+    ) %>% lapply(htmltools::HTML),
+    group = "Var. precipitaciones" 
+  ) %>%
+  addCircleMarkers(
     data = sf_avg_temperature, 
     fillColor = ~pal_temp(avg_temperature_air_temperature_avg),
     weight = .3,
@@ -168,6 +200,30 @@ map <- leaflet() %>%
       "</>"
     ) %>% lapply(htmltools::HTML),
     group = "Temperatura" 
+  ) %>%
+  addCircleMarkers(
+    data = sf_avg_temperature, 
+    fillColor = ~pal_var_avgtemp(variation_temp_years_air_temperature_avg),
+    weight = .3,
+    fillOpacity = 1,
+    radius = 10,
+    popup = paste0(
+      "<p align='left'>",
+      glue("<strong>Central</strong>: <i>{sf_avg_temperature$location_description}</i><br>"),
+      "----<br>",
+      glue("Datos del mes de <strong>{sf_avg_temperature$month}</strong> del año <strong>{sf_avg_temperature$year} y su variación promedio (respecto a los años)</strong>:<br>"),
+      glue("<strong>Temperatura mínima</strong>:   <u>{temp_air_min} ºC</u> (<span style='color:{ifelse(var_air_min >= 0, 'red', 'blue')}'>{ifelse(var_air_min >= 0, paste0('+', var_air_min), var_air_min)} ºC</span>)<br>"),
+      glue("<strong>Temperatura promedio</strong>: <u>{temp_air_avg} ºC</u> (<span style='color:{ifelse(var_air_avg >= 0, 'red', 'blue')}'>{ifelse(var_air_avg >= 0, paste0('+', var_air_avg), var_air_avg)} ºC</span>)<br>"),
+      glue("<strong>Temperatura máxima</strong>:   <u>{temp_air_max} ºC</u> (<span style='color:{ifelse(var_air_max >= 0, 'red', 'blue')}'>{ifelse(var_air_max >= 0, paste0('+', var_air_max), var_air_max)} ºC</span>)"),
+      "</p>" 
+    ) %>% lapply(htmltools::HTML),
+    label = paste0(
+      "<p align='left'>",
+      "<strong>Nombre de la central:</strong><br>",
+      glue("<i><u>{sf_avg_temperature$location_description}</u></i>"),
+      "</>"
+    ) %>% lapply(htmltools::HTML),
+    group = "Var. Temperatura" 
   ) %>%
   addLegend(
     data = sf_precipitaciones,
@@ -196,7 +252,7 @@ map <- leaflet() %>%
     "bottomright"
   )%>%
   addLayersControl(
-    baseGroups = c("Precipitaciones", "Temperatura"),
+    baseGroups = c("Precipitaciones", "Temperatura", "Var. precipitaciones", "Var. Temperatura"),
     overlayGroups = c("Leyenda precipitaciones", "Leyenda Temperatura"),
     options = layersControlOptions(collapsed = T, autoZIndex = TRUE)
   ) %>%

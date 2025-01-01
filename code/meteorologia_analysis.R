@@ -86,8 +86,9 @@ temperatura_plot <- datos_estaciones %>%
   theme_minimal() +
   theme(
     panel.grid.major = element_line(color = "gray",
-                                    linewidth = 0.5,
-                                    linetype = 2),
+                                    linewidth = 0.2),
+    panel.grid.minor = element_line(color = "gray",
+                                    linewidth = 0.2),
     plot.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"),
     panel.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"), 
     panel.grid = element_line(color = "white", linetype = "dashed"),
@@ -99,6 +100,6 @@ temperatura_plot <- datos_estaciones %>%
 ggsave(
   "plots/portfolio_plot.png",
   plot = temperatura_plot,
-  width = 8,
+  width = 7.75,
   height = 3.5
 )

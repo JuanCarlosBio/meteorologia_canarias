@@ -6,7 +6,7 @@ library(gt)
 library(htmltools)
 
 lista_estaciones <- list.files("data/processed/")
-anio_actual <- year(today())
+# anio_actual <- year(today()) #Obviamente, no hay datos todavía para 2025 :/ 
 datos_estaciones <- read_csv(glue("data/processed/{lista_estaciones}")) %>%
   mutate(
     es_anio_actual = year == anio_actual,

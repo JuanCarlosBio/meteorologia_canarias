@@ -6,7 +6,8 @@ library(ggtext)
 
 lista_estaciones <- list.files("data/processed/")
 datos_estaciones <- read_csv(glue("data/processed/{lista_estaciones}"))
-anio_actual <- year(today())
+# anio_actual <- year(today()) #Obviamente, no hay datos todavía para 2025 :/
+anio_actual <- 2024
 
 # GRÁFICO PARA LAS PRECIPITACIONES
 # -------------------------------------------------------------
@@ -42,8 +43,7 @@ precipitaciones_plot <- datos_estaciones %>%
   theme_minimal() +
   theme(
     panel.grid.major = element_line(color = "gray",
-                                    linewidth = 0.5,
-                                    linetype = 2),
+                                    linewidth = 0.5),
     plot.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"),
     panel.background = element_rect(fill = "#0C2B3D", color = "#0C2B3D"),
     panel.grid = element_line(color = "white", linetype = "dashed"),
@@ -95,3 +95,10 @@ temperatura_plot <- datos_estaciones %>%
     axis.title = element_markdown(face = "bold", color = "white"),
     axis.text = element_text(color = "lightgray")
   )
+
+ggsave(
+  "plots/portfolio_plot.png",
+  plot = temperatura_plot,
+  width = 8,
+  height = 3.5
+)

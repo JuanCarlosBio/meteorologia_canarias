@@ -10,6 +10,8 @@ library(htmltools)
 lista_estaciones <- list.files("data/processed/")
 metadata_estaciones <- read_csv("data/raw/estaciones.csv", locale = locale(encoding = "ISO-8859-1"))
 datos_estaciones <- read_csv(glue("data/processed/{lista_estaciones}"))
+# anio_actual <- year(today()) #Obviamente, no hay datos todavía para 2025 :/ 
+anio_actual <- 2024
 municipios_canarias <- read_sf("data/islands_shp/municipios.shp") %>%
   mutate(geometry = st_transform(geometry, crs = 4326))
 
@@ -44,7 +46,7 @@ sf_precipitaciones <- datos_espaciales %>%
          variation_rain = round((sum_precipitation - mean_rain),2),
          location_coordinates = st_as_sfc(location_coordinates, crs = 4326)) %>%
   ungroup() %>%
-  filter(year == year(today())) %>%
+  filter(year == anio_actual) %>%
   arrange(
     year, 
     month, 
@@ -87,7 +89,7 @@ sf_avg_temperature <- datos_espaciales %>%
     year, 
     month, 
     ) %>%
-  filter(year == year(today()) & month == month %>% tail(n=1)) %>%   
+  filter(year == anio_actual & month == month %>% tail(n=1)) %>%   
   st_as_sf()  %>%
   mutate(
     lon = st_coordinates(location_coordinates)[, 1], # Longitude (X)

@@ -88,10 +88,10 @@ df_join <- left_join(precipitaciones, temperatura, by=c("month","isla")) %>%
 gt_table <- df_join %>%
   mutate(
     month = str_to_title(month),
-    variation_rain = paste0(glue("<span style='color: {ifelse(variation_rain >= 0, 'blue', 'red')}'>{ifelse(variation_rain >= 0, paste0('+', variation_rain), variation_rain)}</span>")) %>% lapply(HTML),
-    variation_temp_years_air_temperature_min = paste0(glue("<span style='color: {ifelse(variation_temp_years_air_temperature_min >= 0, 'red', 'green')}'>{ifelse(variation_temp_years_air_temperature_min >= 0, paste0('+', variation_temp_years_air_temperature_min), variation_temp_years_air_temperature_min)}</span>")) %>% lapply(HTML), 
-    variation_temp_years_air_temperature_avg = paste0(glue("<span style='color: {ifelse(variation_temp_years_air_temperature_avg >= 0, 'red', 'green')}'>{ifelse(variation_temp_years_air_temperature_avg >= 0, paste0('+', variation_temp_years_air_temperature_avg), variation_temp_years_air_temperature_avg)}</span>")) %>% lapply(HTML), 
-    variation_temp_years_air_temperature_max = paste0(glue("<span style='color: {ifelse(variation_temp_years_air_temperature_max >= 0, 'red', 'green')}'>{ifelse(variation_temp_years_air_temperature_max >= 0, paste0('+', variation_temp_years_air_temperature_max), variation_temp_years_air_temperature_max)}</span>")) %>% lapply(HTML) 
+    variation_rain = paste0(glue("<span style='color: {ifelse(variation_rain >= 0, 'green', 'brown')}'>{ifelse(variation_rain >= 0, paste0('+', variation_rain), variation_rain)}</span>")) %>% lapply(HTML),
+    variation_temp_years_air_temperature_min = paste0(glue("<span style='color: {ifelse(variation_temp_years_air_temperature_min >= 0, 'red', 'blue')}'>{ifelse(variation_temp_years_air_temperature_min >= 0, paste0('+', variation_temp_years_air_temperature_min), variation_temp_years_air_temperature_min)}</span>")) %>% lapply(HTML), 
+    variation_temp_years_air_temperature_avg = paste0(glue("<span style='color: {ifelse(variation_temp_years_air_temperature_avg >= 0, 'red', 'blue')}'>{ifelse(variation_temp_years_air_temperature_avg >= 0, paste0('+', variation_temp_years_air_temperature_avg), variation_temp_years_air_temperature_avg)}</span>")) %>% lapply(HTML), 
+    variation_temp_years_air_temperature_max = paste0(glue("<span style='color: {ifelse(variation_temp_years_air_temperature_max >= 0, 'red', 'blue')}'>{ifelse(variation_temp_years_air_temperature_max >= 0, paste0('+', variation_temp_years_air_temperature_max), variation_temp_years_air_temperature_max)}</span>")) %>% lapply(HTML) 
   ) %>%
   gt() %>%
     cols_move_to_start(
@@ -106,6 +106,7 @@ gt_table <- df_join %>%
   ) %>%
   cols_label(
     month                                    = md("<p align='center'><strong>Mes</strong></p>"),
+    isla                                     = md("<p align='center'><strong>Isla</strong></p>"),
     sum_precipitation                        = md("<p align='center'><strong>Precipitación<br>Acumulada</strong></p>"),
     variation_rain                           = md("<p align='center'><strong>Variación de la<br>Precipitación</strong></p>"),
     avg_temperature_air_temperature_min      = md("<p align='center'><strong>Temperatura<br>Mínima</strong></p>"),

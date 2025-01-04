@@ -28,7 +28,7 @@ GRÁFICAS
 Column {data-width=800}
 -----------------------------------------------------------------------
 
-### **Mapa de las estaciones meteorológicas de Canarias para los datos el último mes (Datos públicos de GRAPHCAN)**
+### **Mapa de las estaciones meteorológicas de Canarias para los datos el último mes ([fuente: SITCAN, Gobierno de Canarias](https://opendata.sitcan.es/dataset/sistema-de-observacion-meteorologica-de-canarias))**
 
 ```{r, echo = FALSE, message = FALSE, warning=FALSE, out.width = '100%'}
 map
@@ -39,7 +39,7 @@ map
 Column 
 -----------------------------------------------------------------------
 
-### **Gráfico para la precipitación por mes.** 
+### **Gráfico para la precipitación por mes** 
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 ggplotly(precipitaciones_plot, tooltip = "text") %>% 

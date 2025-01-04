@@ -7,42 +7,58 @@ library(htmltools)
 
 lista_estaciones <- list.files("data/processed/")
 # anio_actual <- year(today()) #Obviamente, no hay datos todavía para 2025 :/ 
+anio_actual <- 2024
 datos_estaciones <- read_csv(glue("data/processed/{lista_estaciones}")) %>%
   mutate(
     es_anio_actual = year == anio_actual,
     month = factor(
       month,
       levels = c(1:12),
-      labels = c("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre")
-    )  
-  )
+      labels = c("enero", "febrero", "marzo", 
+                 "abril", "mayo", "junio", 
+                 "julio", "agosto", "septiembre", 
+                 "octubre", "noviembre", "diciembre")),
+      isla = case_when(
+        thing_id %in% c(6, 8, 11, 23, 31, 32) ~ "LANZAROTE",
+        thing_id %in% c(12, 16, 17, 21, 48, 52, 53, 58) ~ "FUERTEVENTURA",
+        thing_id %in% c(2, 7, 10, 14, 15, 19, 20, 25, 27, 41, 42, 43) ~ "GRAN CANARIA",
+        thing_id %in% c(3, 5, 9, 18, 22, 28, 36, 37, 44, 45, 46, 47, 
+                        49, 50, 51, 54, 56) ~ "TENERIFE",
+        thing_id %in% c(4, 24, 35, 39, 57) ~ "LA PALMA",
+        thing_id %in% c(29, 30, 38, 40, 55) ~ "LA GOMERA",
+        thing_id %in% c(13, 26, 33, 34) ~ "EL HIERRO",
+        TRUE ~ NA_character_
+   ))  
 
 precipitaciones <- datos_estaciones %>%
   filter(str_detect(datastream_name, "Rain")) %>%
   group_by(
     datastream_name, 
     year, 
-    month 
+    month,
+    isla 
   ) %>%
   summarise(sum_precipitation = round(sum(result, na.rm = TRUE), 2)) %>%
   ungroup() %>%
   group_by(
     datastream_name, 
-    month 
+    month,
+    isla 
     ) %>% 
   mutate(mean_rain = mean(sum_precipitation),
          variation_rain = round((sum_precipitation - mean_rain),2)) %>%
   ungroup() %>%
   filter(year == anio_actual) %>%
   select(-datastream_name, -mean_rain) %>%
-  arrange(year, month)
+  arrange(year, month, isla)
 
 temperatura <- datos_estaciones %>%
   filter(str_detect(datastream_name, "Air temperature")) %>%
   group_by(
     datastream_name, 
     year, 
-    month 
+    month,
+    isla
   ) %>%
   summarise(avg_temperature = round(mean(result, na.rm = TRUE), 2)) %>%
   ungroup() %>%
@@ -51,20 +67,22 @@ temperatura <- datos_estaciones %>%
   ungroup() %>%
   group_by(
     datastream_name, 
-    month 
+    month,
+    isla
   ) %>%   
   mutate(
     mean_temp_years = mean(avg_temperature),
     variation_temp_years = round((avg_temperature - mean_temp_years),2),
   ) %>%
   select(-mean_temp_years) %>%
-  pivot_wider(names_from = "datastream_name", values_from = c("avg_temperature", "variation_temp_years")) %>% 
+  pivot_wider(names_from = "datastream_name", 
+              values_from = c("avg_temperature", "variation_temp_years")) %>% 
   ungroup() %>% 
   filter(year == anio_actual) %>%
   arrange(year, month)
 
 # Data para el 2024
-df_join <- left_join(precipitaciones, temperatura, by="month") %>%
+df_join <- left_join(precipitaciones, temperatura, by=c("month","isla")) %>%
   select(-starts_with("year"))
 
 gt_table <- df_join %>%
@@ -79,6 +97,7 @@ gt_table <- df_join %>%
     cols_move_to_start(
     columns = c(
       month,
+      isla,
       sum_precipitation, variation_rain, 
       avg_temperature_air_temperature_min, variation_temp_years_air_temperature_min,
       avg_temperature_air_temperature_avg, variation_temp_years_air_temperature_avg, 
@@ -98,7 +117,13 @@ gt_table <- df_join %>%
   ) %>%
   tab_header(
   title = glue("TABLA DE METEOROLOGÍA DE LAS ISLAS CANARIAS PARA EL AÑO {anio_actual}"),
-  subtitle = "Variables de precipitaciones y temperaturas"
-  ) 
+  subtitle = md('Variables de precipitaciones y temperaturas<br>**Recomendación**: Puedes filtrar el mes o la isla en el buscador "Search", <u>por ejemplo: "gran canaria" filtra la isla de Gran Canaria</u>')
+  ) %>%
+  opt_interactive(
+      use_search = TRUE,
+      use_resizers = TRUE,
+      use_compact_mode = TRUE
+  )
+  
    
  

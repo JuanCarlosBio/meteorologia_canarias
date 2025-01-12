@@ -2,16 +2,68 @@
 title: "DASHBOARD SOBRE LA METEOROLOGIA EN CANARIAS"
 author: "Juan Carlos García Estupiñán"
 date: '2024'
-output: 
-    flexdashboard::flex_dashboard:
-    orientation: columns
-    social: menu
-    source_code: embed
+output:
+  flexdashboard::flex_dashboard:
+    theme:
+      version: 4
+      bg: "#0C2B3D"   
+      fg: "#ffffff" 
+      primary: "#0C2B3D"
+      navbar-bg: "#3ADAC6"
+      base_font: 
+        google: Prompt
+      heading_font:
+        google: Sen
+      code_font:
+        google: 
+          # arguments to sass::font_google() 
+          family: JetBrains Mono
+          local: false
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, context = "server"}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+<style>
+  .navbar-inverse {                /* navbar */
+    background-color: #A8F79E;
+    border-color: #A8F79E;
+  }
+  .navbar-inverse .navbar-nav>.active > a, .navbar-inverse .navbar-nav>.active > a:hover, .navbar-inverse .navbar-nav>.active > a:focus {
+    color: #ffffff;
+    background-color: #a0dcff;     /* active tab */
+  }
+  .navbar-inverse .navbar-nav>li > a:hover, .navbar-inverse .navbar-nav > li > a:focus {
+    color: #ffffff;
+    background-color: #a0dcff;     /* inactive tab on hover/focus */
+  }
+
+  a {
+    color: #00ffa1;
+  }
+
+  a:hover {
+    color: white;
+  }
+
+  a:active {
+    color: white;
+  }
+
+.nav-tabs-custom .nav-tabs > li > a {
+  color: green;
+} 
+
+.nav-tabs-custom .nav-tabs > li.active > a {
+  color: red;
+} 
+
+.nav-tabs-custom .nav-tabs > li.active > a:hover {
+  color: purple;
+}
+
+</style>
 
 ```{r echo=FALSE, warning=FALSE, include=FALSE, message=FALSE}
 source("code/meteorologia_analysis.R")
@@ -28,7 +80,7 @@ GRÁFICAS
 Column {data-width=800}
 -----------------------------------------------------------------------
 
-### **Mapa de las estaciones meteorológicas de Canarias para los datos el último mes ([fuente: SITCAN, Gobierno de Canarias](https://opendata.sitcan.es/dataset/sistema-de-observacion-meteorologica-de-canarias))**
+### **Mapa de las estaciones meteorológicas de Canarias para los datos el último mes.<br>Fecha de la última actualización: `r format(lubridate::today(), "%d/%m/%Y")`.<br>[Fuente: SITCAN, Gobierno de Canarias](https://opendata.sitcan.es/dataset/sistema-de-observacion-meteorologica-de-canarias)**
 
 ```{r, echo = FALSE, message = FALSE, warning=FALSE, out.width = '100%'}
 map
@@ -39,7 +91,7 @@ map
 Column 
 -----------------------------------------------------------------------
 
-### **Gráfico para la precipitación por mes** 
+### **Gráfico para la precipitación por mes.** 
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 ggplotly(precipitaciones_plot, tooltip = "text") %>% 
@@ -47,7 +99,7 @@ ggplotly(precipitaciones_plot, tooltip = "text") %>%
 ```
 
 
-### **Gráfico para la temperatura promedio por mes**
+### **Gráfico para la temperatura promedio por mes.**
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 ggplotly(temperatura_plot, tooltip = "text") %>% 

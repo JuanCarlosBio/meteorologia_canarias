@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} Está ejecutando Snakemake workflow 🚀
 on: 
   #[push]
    schedule:
-     - cron: '0 0 1 * *'
+     - cron: '0 0 * * 0'
 jobs:
   ejecutar--snakemake-workflow-especies-gc:
     runs-on: ubuntu-latest

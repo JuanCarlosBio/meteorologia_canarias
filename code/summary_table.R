@@ -155,15 +155,13 @@ gt_table <- df_join %>%
     use_text_wrapping = FALSE,
     use_page_size_select = TRUE
   ) %>%
-  opt_stylize() %>%
   tab_options(
-    heading.border.bottom.color = "lightgray",
-    table.border.top.color="lightgray", 
-    table.border.bottom.color="lightgray",
-    column_labels.border.top.color = "lightgray",
-    column_labels.border.bottom.color = "lightgray",
-    table_body.border.bottom.color = "lightgray"
+    heading.border.bottom.color = "#0C2B3D",
+    table.border.top.color="#0C2B3D", 
+    table.border.bottom.color="#0C2B3D",
+    column_labels.border.top.color = "#0C2B3D",
+    column_labels.border.bottom.color = "#0C2B3D",
+    table_body.border.bottom.color = "#0C2B3D",
+    table.background.color = "#d6f0ff",
+    summary_row.border.color = "#0C2B3D"
   )
-  
-   
- 

@@ -10,8 +10,8 @@ library(htmltools)
 lista_estaciones <- list.files("data/processed/")
 metadata_estaciones <- read_csv("data/raw/estaciones.csv", locale = locale(encoding = "ISO-8859-1"))
 datos_estaciones <- read_csv(glue("data/processed/{lista_estaciones}"))
-# anio_actual <- year(today()) #Obviamente, no hay datos todavía para 2025 :/ 
-anio_actual <- 2024
+anio_actual <- year(today()) #Obviamente, no hay datos todavía para 2025 :/ 
+#anio_actual <- 2024
 municipios_canarias <- read_sf("data/islands_shp/municipios.shp") %>%
   mutate(geometry = st_transform(geometry, crs = 4326))
 

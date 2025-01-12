@@ -23,12 +23,14 @@ datos_espaciales <- left_join(metadata_estaciones, datos_estaciones, by = "thing
                         labels = c("enero", "febrero", "marzo",
                                    "abril", "mayo", "junio",
                                    "julio", "agosto", "septiempre",
-                                   "octubre", "noviembre", "diciembre")))
+                                   "octubre", "noviembre", "diciembre")),
+          thing_id = str_pad(as.character(thing_id), width = 2, pad = "0"))
 
 sf_precipitaciones <- datos_espaciales %>% 
   filter(str_detect(datastream_name, "Rain")) %>%
   group_by(
     location_description, 
+    thing_id,
     datastream_name, 
     year, 
     month, 
@@ -38,6 +40,7 @@ sf_precipitaciones <- datos_espaciales %>%
   ungroup() %>%
   group_by(
     location_description, 
+    thing_id,
     datastream_name, 
     month, 
     location_coordinates
@@ -62,6 +65,7 @@ sf_avg_temperature <- datos_espaciales %>%
   filter(str_detect(datastream_name, "Air temperature") ) %>% 
   group_by(
     location_description, 
+    thing_id,
     datastream_name, 
     year, 
     month, 
@@ -143,7 +147,8 @@ map <- leaflet() %>%
     radius = 10,
     popup = paste0(
       "<p align='left'>",
-      glue("<strong>Central</strong>: <i>{sf_precipitaciones$location_description}</i><br>"),
+      glue("<strong>Nombre de la central</strong>: <i>{sf_precipitaciones$location_description}</i><br>"),
+      glue("<strong>Número identificador (ID)</strong>: {sf_precipitaciones$thing_id}<br>"),
       "----<br>",
       glue("Datos del mes de <strong>{sf_precipitaciones$month}</strong> del año <strong>{sf_precipitaciones$year} y su variación con respecto a los años</strong>:<br>"),
       glue("<strong>Precipitación acumulada</strong>: <u>{sum_precip} mm</u> (<span style='color:{ifelse(var_precip >= 0, 'green', 'red')}'>{ifelse(var_precip >= 0, paste0('+', var_precip), var_precip)}</span> mm)"),
@@ -152,7 +157,8 @@ map <- leaflet() %>%
     label = paste0(
       "<p align='left'>",
       "<strong>Nombre de la central:</strong><br>",
-      glue("<i><u>{sf_precipitaciones$location_description}</u></i>"),
+      glue("<i><u>{sf_precipitaciones$location_description}</u></i><br>"),
+      glue("<strong>Número identificador (ID)</strong>: {sf_precipitaciones$thing_id}<br>"),
       "</>"
     ) %>% lapply(htmltools::HTML),
     group = "Precipitaciones" 
@@ -166,6 +172,7 @@ map <- leaflet() %>%
     popup = paste0(
       "<p align='left'>",
       glue("<strong>Central</strong>: <i>{sf_precipitaciones$location_description}</i><br>"),
+      glue("<strong>Número identificador (ID)</strong>: {sf_precipitaciones$thing_id}<br>"),
       "----<br>",
       glue("Datos del mes de <strong>{sf_precipitaciones$month}</strong> del año <strong>{sf_precipitaciones$year} y su variación con respecto a los años</strong>:<br>"),
       glue("<strong>Precipitación acumulada</strong>: <u>{sum_precip} mm</u> (<span style='color:{ifelse(var_precip >= 0, 'green', 'red')}'>{ifelse(var_precip >= 0, paste0('+', var_precip), var_precip)}</span> mm)"),
@@ -188,6 +195,7 @@ map <- leaflet() %>%
     popup = paste0(
       "<p align='left'>",
       glue("<strong>Central</strong>: <i>{sf_avg_temperature$location_description}</i><br>"),
+      glue("<strong>Central</strong>: <i>{sf_avg_temperature$thing_id}</i><br>"),
       "----<br>",
       glue("Datos del mes de <strong>{sf_avg_temperature$month}</strong> del año <strong>{sf_avg_temperature$year} y su variación promedio (respecto a los años)</strong>:<br>"),
       glue("<strong>Temperatura mínima</strong>:   <u>{temp_air_min} ºC</u> (<span style='color:{ifelse(var_air_min >= 0, 'red', 'blue')}'>{ifelse(var_air_min >= 0, paste0('+', var_air_min), var_air_min)} ºC</span>)<br>"),
@@ -212,6 +220,7 @@ map <- leaflet() %>%
     popup = paste0(
       "<p align='left'>",
       glue("<strong>Central</strong>: <i>{sf_avg_temperature$location_description}</i><br>"),
+      glue("<strong>Central</strong>: <i>{sf_avg_temperature$thing_id}</i><br>"),
       "----<br>",
       glue("Datos del mes de <strong>{sf_avg_temperature$month}</strong> del año <strong>{sf_avg_temperature$year} y su variación promedio (respecto a los años)</strong>:<br>"),
       glue("<strong>Temperatura mínima</strong>:   <u>{temp_air_min} ºC</u> (<span style='color:{ifelse(var_air_min >= 0, 'red', 'blue')}'>{ifelse(var_air_min >= 0, paste0('+', var_air_min), var_air_min)} ºC</span>)<br>"),

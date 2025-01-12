@@ -6,8 +6,8 @@ library(ggtext)
 
 lista_estaciones <- list.files("data/processed/")
 datos_estaciones <- read_csv(glue("data/processed/{lista_estaciones}"))
-# anio_actual <- year(today()) #Obviamente, no hay datos todavía para 2025 :/
-anio_actual <- 2024
+anio_actual <- year(today()) #Obviamente, no hay datos todavía para 2025 :/
+#anio_actual <- 2024
 
 # GRÁFICO PARA LAS PRECIPITACIONES
 # -------------------------------------------------------------
@@ -26,6 +26,10 @@ precipitaciones_plot <- datos_estaciones %>%
       glue("Fecha: mes {month} del año {year}"), "\n", 
       glue("Precipitación acumulada: {round(precipitacion_acumulada * 10^3,2)} mm")
     ))) +
+  geom_point(aes(text = paste0(
+      glue("Fecha: mes {month} del año {year}"), "\n", 
+      glue("Precipitación acumulada: {round(precipitacion_acumulada * 10^3,2)} mm")
+    )), show.legend = FALSE) +
   geom_smooth(aes(group = 1), se = F, show.legend = F) +
   scale_x_continuous(limits = c(1,12),
                      breaks = seq(1,12,1),
@@ -69,6 +73,10 @@ temperatura_plot <- datos_estaciones %>%
      glue("Temperatura promedio: {round(temp_avg,2)} ºC")
     )
   )) +
+  geom_point(aes(text = paste0(
+     glue("Fecha: mes {month} del año {year}"), "\n", 
+     glue("Temperatura promedio: {round(temp_avg,2)} ºC")
+    )), show.legend = FALSE) +
   geom_smooth(aes(group = 1), se = F, show.legend = F) +
   scale_x_continuous(limits = c(1,12),
                      breaks = seq(1,12,1),

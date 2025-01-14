@@ -116,11 +116,11 @@ gt_table <- df_join %>%
   ) %>%
   tab_header(
   title = md(glue("TABLA DE METEOROLOGÍA DE LAS ISLAS CANARIAS PARA EL AÑO <span style='color: red'><i>{anio_actual}</i></span>")),
-  subtitle = md(paste('
-  Variables de precipitaciones y temperaturas<br>',
-  '**Recomendación**: Puedes filtrar el mes o la isla en el buscador "Search",',
-  ' <u>por ejemplo: "gran canaria" filtra la isla de Gran Canaria</u>.',
-  "También puedes filtrar en cada cuadro de búsqueda de cada una de las columnas."))
+  subtitle = md(paste(
+    glue('**<u>Variables de precipitaciones y temperaturas</u>** (última actualización {format(lubridate::today(), "%d/%m/%Y")})<br>'),
+    '**Recomendación**: Puedes filtrar el mes o la isla en el buscador "Search",',
+    ' <i>por ejemplo: "gran canaria" filtra la isla de Gran Canaria</i>.',
+    "También puedes filtrar en cada cuadro de búsqueda de cada una de las columnas."))
   ) %>%
   tab_footnote(
     footnote = md(paste0(

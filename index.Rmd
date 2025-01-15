@@ -69,6 +69,7 @@ knitr::opts_chunk$set(echo = TRUE)
 source("code/meteorologia_analysis.R")
 source("code/mapa_canarias.R")
 source("code/summary_table.R")
+source("code/registro_table.R")
 library(flexdashboard)
 library(plotly)
 ```
@@ -110,6 +111,16 @@ ggplotly(temperatura_plot, tooltip = "text") %>%
 TABLAS
 =======================================================================
 
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Tabla para los datos de 2025
+
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 gt_table
+```
+### Registro de datos de años anteriores
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+record_table
 ```

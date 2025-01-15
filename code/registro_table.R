@@ -69,7 +69,6 @@ df_join <- left_join(precipitaciones,
                      temperatura, 
                      by=c("month", "year","isla", "thing_id")) %>%
     filter(month %in% meses_labels[1:month(today())]) %>%
-    mutate(month = str_to_title(month)) %>%
     select(-datastream_name)
 
 record_table <- df_join %>%

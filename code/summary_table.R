@@ -90,6 +90,9 @@ gt_table <- df_join %>%
     variation_temp_years_air_temperature_max = paste0(glue("<span style='color: {ifelse(variation_temp_years_air_temperature_max >= 0, 'red', 'blue')}'>{ifelse(variation_temp_years_air_temperature_max >= 0, paste0('+', variation_temp_years_air_temperature_max), variation_temp_years_air_temperature_max)}</span>")) %>% lapply(HTML) 
   ) %>%
   gt() %>%
+  cols_align(
+    align = "center"
+  ) %>% 
     cols_move_to_start(
     columns = c(
       isla,
@@ -102,14 +105,14 @@ gt_table <- df_join %>%
     )
   ) %>%
   cols_label(
-    isla                                     = md("<p align='center'><strong>Isla</strong></p>"),
-    thing_id                                  = md("<p align='center'><strong>ID Central</strong></p>"),
-    month                                    = md("<p align='center'><strong>Mes</strong></p>"),
-    sum_precipitation                        = md("<p align='center'><strong>Precipitación<br>Acumulada</strong></p>"),
-    variation_rain                           = md("<p align='center'><strong>Variación de la<br>Precipitación</strong></p>"),
-    avg_temperature_air_temperature_min      = md("<p align='center'><strong>Temperatura<br>Mínima</strong></p>"),
-    avg_temperature_air_temperature_avg      = md("<p align='center'><strong>Temperatura<br>Promedio</strong></p>"),
-    avg_temperature_air_temperature_max      = md("<p align='center'><strong>Temperatura<br>Máxima</strong></p>"),
+    isla = md("<p align='center'><strong>Isla</strong></p>"),
+    thing_id = md("<p align='center'><strong>ID Central</strong></p>"),
+    month = md("<p align='center'><strong>Mes</strong></p>"),
+    sum_precipitation = md("<p align='center'><strong>Precipitación<br>Acumulada</strong></p>"),
+    variation_rain = md("<p align='center'><strong>Variación de la<br>Precipitación</strong></p>"),
+    avg_temperature_air_temperature_min = md("<p align='center'><strong>Temperatura<br>Mínima</strong></p>"),
+    avg_temperature_air_temperature_avg = md("<p align='center'><strong>Temperatura<br>Promedio</strong></p>"),
+    avg_temperature_air_temperature_max = md("<p align='center'><strong>Temperatura<br>Máxima</strong></p>"),
     variation_temp_years_air_temperature_min = md("<p align='center'><strong>Variación de la<br>T. Mínima</strong></p>"),
     variation_temp_years_air_temperature_avg = md("<p align='center'><strong>Variación de la<br>T. Promedio</strong></p>"),
     variation_temp_years_air_temperature_max = md("<p align='center'><strong>Variación de la<br>T. Máxima</strong></p>")

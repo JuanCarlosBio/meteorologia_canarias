@@ -52,24 +52,30 @@ knitr::opts_chunk$set(echo = TRUE)
   }
 
 .nav-tabs-custom .nav-tabs > li > a {
-  color: green;
+  color: white;
 } 
 
 .nav-tabs-custom .nav-tabs > li.active > a {
-  color: red;
+  color: #00ffa1;
 } 
 
 .nav-tabs-custom .nav-tabs > li.active > a:hover {
-  color: purple;
+  color: gray;
 }
 
 </style>
 
 ```{r echo=FALSE, warning=FALSE, include=FALSE, message=FALSE}
-source("code/meteorologia_analysis.R")
-source("code/mapa_canarias.R")
-source("code/summary_table.R")
-source("code/registro_table.R")
+paths <- c(
+  "code/meteorologia_analysis.R", 
+  "code/mapa_canarias.R", 
+  "code/summary_table.R", 
+  "code/registro_table.R", 
+  "code/id_meteorology_stations.R"
+  )
+
+for (path in paths) {source(path)}
+
 library(flexdashboard)
 library(plotly)
 ```
@@ -123,4 +129,10 @@ gt_table
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 record_table
+```
+
+### Índice con las estaciones de Canarias
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+metadata_estaciones 
 ```

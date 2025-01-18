@@ -50,14 +50,15 @@ rule processed_data:
 
 rule create_dashboard:
   input:
-    rmd_index             = "index.Rmd",
-    map_r_script          = "code/mapa_canarias.R",
-    plots_r_script        = "code/meteorologia_analysis.R",
-    table_r_script        = "code/summary_table.R",
-    table_record_r_script = "code/registro_table.R",
-    shp                   = "data/islands_shp/municipios.shp",
-    csv_file              = "data/raw/estaciones.csv",
-    processed_done        = "tasks/process_data_ok.done"
+    rmd_index               = "index.Rmd",
+    map_r_script            = "code/mapa_canarias.R",
+    plots_r_script          = "code/meteorologia_analysis.R",
+    table_r_script          = "code/summary_table.R",
+    table_record_r_script   = "code/registro_table.R",
+    table_stations_metadata = "code/id_meteorology_stations.R",
+    shp                     = "data/islands_shp/municipios.shp",
+    csv_file                = "data/raw/estaciones.csv",
+    processed_done          = "tasks/process_data_ok.done"
   output:
     "index.html"
   conda:

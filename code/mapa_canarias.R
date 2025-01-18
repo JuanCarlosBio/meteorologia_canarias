@@ -10,7 +10,7 @@ library(htmltools)
 lista_estaciones <- list.files("data/processed/")
 metadata_estaciones <- read_csv("data/raw/estaciones.csv", locale = locale(encoding = "ISO-8859-1"))
 datos_estaciones <- read_csv(glue("data/processed/{lista_estaciones}"))
-anio_actual <- year(today()) #Obviamente, no hay datos todavía para 2025 :/ 
+anio_actual <- year(today())  
 #anio_actual <- 2024
 municipios_canarias <- read_sf("data/islands_shp/municipios.shp") %>%
   mutate(geometry = st_transform(geometry, crs = 4326))
@@ -35,7 +35,7 @@ sf_precipitaciones <- datos_espaciales %>%
     year, 
     month, 
     location_coordinates
-    ) %>%
+  ) %>%
   summarise(sum_precipitation = round(sum(result, na.rm = TRUE), 2)) %>%
   ungroup() %>%
   group_by(
@@ -45,9 +45,11 @@ sf_precipitaciones <- datos_espaciales %>%
     month, 
     location_coordinates
     ) %>% 
-  mutate(mean_rain = mean(sum_precipitation),
-         variation_rain = round((sum_precipitation - mean_rain),2),
-         location_coordinates = st_as_sfc(location_coordinates, crs = 4326)) %>%
+  mutate(
+    mean_rain = mean(sum_precipitation),
+    variation_rain = round((sum_precipitation - mean_rain),2),
+    location_coordinates = st_as_sfc(location_coordinates, crs = 4326)
+  ) %>%
   ungroup() %>%
   filter(year == anio_actual) %>%
   arrange(
@@ -58,7 +60,8 @@ sf_precipitaciones <- datos_espaciales %>%
   st_as_sf() %>%
   mutate(
     lon = st_coordinates(location_coordinates)[, 1], # Longitude (X)
-    lat = st_coordinates(location_coordinates)[, 2]  # Latitude (Y)
+    lat = st_coordinates(location_coordinates)[, 2], # Latitude (Y) 
+    variation_prep_char = ifelse(variation_rain >= 0, "Incremento", "Descenso") 
   )
 
 sf_avg_temperature <- datos_espaciales %>% 
@@ -73,8 +76,14 @@ sf_avg_temperature <- datos_espaciales %>%
   ) %>% 
   summarise(avg_temperature = round(mean(result, na.rm = TRUE), 2)) %>%
   ungroup() %>%
-  mutate(datastream_name = tolower(str_replace_all(datastream_name, pattern = " ", replacement = "_")),
-         datastream_name = tolower(str_replace_all(datastream_name, pattern = "[\\(\\)\\.]", replacement = ""))) %>%  
+  mutate(
+    datastream_name = tolower(
+      str_replace_all(datastream_name, pattern = " ", replacement = "_")
+    ),
+    datastream_name = tolower(
+    str_replace_all(datastream_name, pattern = "[\\(\\)\\.]", replacement = "")
+    )
+  ) %>%  
   ungroup() %>%
   group_by(
     location_description, 
@@ -85,9 +94,12 @@ sf_avg_temperature <- datos_espaciales %>%
   mutate(
     mean_temp_years = mean(avg_temperature),
     variation_temp_years = round((avg_temperature - mean_temp_years),2),
-    location_coordinates = st_as_sfc(location_coordinates, crs = 4326)) %>%
+    location_coordinates = st_as_sfc(location_coordinates, crs = 4326)
+  ) %>%
   select(-mean_temp_years) %>%
-  pivot_wider(names_from = "datastream_name", values_from = c("avg_temperature", "variation_temp_years")) %>% 
+  pivot_wider(
+    names_from = "datastream_name", 
+    values_from = c("avg_temperature", "variation_temp_years")) %>% 
   ungroup() %>% 
   arrange(
     year, 
@@ -97,31 +109,15 @@ sf_avg_temperature <- datos_espaciales %>%
   st_as_sf()  %>%
   mutate(
     lon = st_coordinates(location_coordinates)[, 1], # Longitude (X)
-    lat = st_coordinates(location_coordinates)[, 2]  # Latitude (Y)
+    lat = st_coordinates(location_coordinates)[, 2], # Latitude (Y)
+    variation_temp_char = ifelse(variation_temp_years_air_temperature_avg >= 0, "Incremento", "Descenso")
   )
-
-pal_prep <- colorNumeric(
-  palette = "Blues",
-  domain = sf_precipitaciones$sum_precipitation
-)
-
-pal_varprep <- colorNumeric(
-  palette = "RdYlGn",
-  domain = sf_precipitaciones$variation_rain
-)
-
-bins <- c(0, 10, 20, 30, Inf)
-pal_temp <- colorBin("YlOrRd", domain = sf_avg_temperature$avg_temperature_air_temperature_avg, bins = bins)
-
-pal_var_avgtemp <- colorNumeric(
-  palette = c("blue", "white", "red"),
-  domain = sf_avg_temperature$variation_temp_years_air_temperature_avg
-)
 
 ## Resumir nombre de las variables:
 ## Precipitaciones
 sum_precip <- sf_precipitaciones$sum_precipitation
 var_precip <- sf_precipitaciones$variation_rain 
+variation_prep_char <- sf_precipitaciones$variation_prep_char
 ## Temperatura 
 temp_air_min <- sf_avg_temperature$avg_temperature_air_temperature_min
 temp_air_avg <- sf_avg_temperature$avg_temperature_air_temperature_avg
@@ -130,6 +126,40 @@ temp_air_max <- sf_avg_temperature$avg_temperature_air_temperature_max
 var_air_min <- sf_avg_temperature$variation_temp_years_air_temperature_min
 var_air_avg <- sf_avg_temperature$variation_temp_years_air_temperature_avg
 var_air_max <- sf_avg_temperature$variation_temp_years_air_temperature_max
+
+variation_temp_char <- sf_avg_temperature$variation_temp_char
+
+pal_prep <- colorNumeric(
+  palette = "Blues",
+  domain = sf_precipitaciones$sum_precipitation
+)
+
+pal_varprep <- colorFactor(
+  ## Bueno ya veremos que hacemos con esto en un futuro dios xd, no me gusta el nesting pero bueno me soluciona el problema
+  ## Problema: aveces la variación de las precipitaciones es solo positiva y aveces solo negativa, por el condicional 
+  palette = if (length(unique(variation_prep_char)) == 2) {
+    c("green", "brown") 
+  } else if (length(unique(variation_prep_char)) == 1 && unique(variation_prep_char) == "Descenso") {
+    "brown" 
+  } else if (length(unique(variation_prep_char)) == 1 && unique(variation_prep_char) == "Incremento") {
+    "green" 
+  },
+  domain = variation_prep_char
+)
+
+bins <- c(0, 10, 20, 30, Inf)
+pal_temp <- colorBin("YlOrRd", domain = sf_avg_temperature$avg_temperature_air_temperature_avg, bins = bins)
+
+pal_var_avgtemp <- colorFactor(
+  palette = if (length(unique(variation_temp_char)) == 2) {
+    c("blue", "red") 
+  } else if (length(unique(variation_temp_char)) == 1 && unique(variation_temp_char) == "Descenso") {
+    "blue" 
+  } else if (length(unique(variation_temp_char)) == 1 && unique(variation_temp_char) == "Incremento") {
+    "red" 
+  },
+  domain = variation_temp_char
+)
 
 map <- leaflet() %>%
   setView(-15.8, 28.4, zoom = 8)  %>% 
@@ -151,7 +181,7 @@ map <- leaflet() %>%
       glue("<strong>Número identificador (ID)</strong>: {sf_precipitaciones$thing_id}<br>"),
       "----<br>",
       glue("Datos del mes de <strong>{sf_precipitaciones$month}</strong> del año <strong>{sf_precipitaciones$year} y su variación con respecto a los años</strong>:<br>"),
-      glue("<strong>Precipitación acumulada</strong>: <u>{sum_precip} mm</u> (<span style='color:{ifelse(var_precip >= 0, 'green', 'red')}'>{ifelse(var_precip >= 0, paste0('+', var_precip), var_precip)}</span> mm)"),
+      glue("<strong>Precipitación acumulada</strong>: <u>{sum_precip} mm</u> (<span style='color:{ifelse(var_precip >= 0, 'green', 'brown')}'>{ifelse(var_precip >= 0, paste0('+', var_precip), var_precip)}</span> mm)"),
       "</p>" 
     ) %>% lapply(htmltools::HTML),
     label = paste0(
@@ -165,7 +195,7 @@ map <- leaflet() %>%
   ) %>%
   addCircleMarkers(
     data = sf_precipitaciones, 
-    fillColor = ~pal_varprep(variation_rain),
+    fillColor = ~pal_varprep(variation_prep_char),
     weight = .3,
     fillOpacity = 1,
     radius = 10,
@@ -213,7 +243,7 @@ map <- leaflet() %>%
   ) %>%
   addCircleMarkers(
     data = sf_avg_temperature, 
-    fillColor = ~pal_var_avgtemp(variation_temp_years_air_temperature_avg),
+    fillColor = ~pal_var_avgtemp(variation_temp_char),
     weight = .3,
     fillOpacity = 1,
     radius = 10,
@@ -237,16 +267,29 @@ map <- leaflet() %>%
     group = "Var. Temperatura" 
   ) %>%
   addLegend(
-    data = sf_precipitaciones,
-    pal = pal_prep,
-    values = ~sum_precipitation,
+    data = sf_avg_temperature,
+    pal = pal_var_avgtemp,
+    values = ~variation_temp_char,
     title = paste0(
       "<p align='left'>",
-      "Leyenda<br>Precip. Acumulada",
+      "Variación temperatura<br>promedio",
       "</p>"
       ) %>% lapply(htmltools::HTML),
     opacity = 1,
-    group = "Leyenda precipitaciones",
+    group = "Variación de temperatura",
+    "bottomright"
+  ) %>%
+  addLegend(
+    data = sf_precipitaciones,
+    pal = pal_varprep,
+    values = ~variation_prep_char,
+    title = paste0(
+      "<p align='left'>",
+      "Variación precipitación",
+      "</p>"
+      ) %>% lapply(htmltools::HTML),
+    opacity = 1,
+    group = "Variación de precipitaciones",
     "bottomright"
   ) %>%
   addLegend(
@@ -255,16 +298,29 @@ map <- leaflet() %>%
     values = ~avg_temperature_air_temperature_avg,
     title = paste0(
       "<p align='left'>",
-      "Leyenda<br>Temp. Promedio",
+      "Temperatura Promedio",
       "</p>"
       ) %>% lapply(htmltools::HTML),
     opacity = 1,
     group = "Leyenda Temperatura",
     "bottomright"
-  )%>%
+  ) %>%
+  addLegend(
+    data = sf_precipitaciones,
+    pal = pal_prep,
+    values = ~sum_precipitation,
+    title = paste0(
+      "<p align='left'>",
+      "Precipitación acumulada",
+      "</p>"
+      ) %>% lapply(htmltools::HTML),
+    opacity = 1,
+    group = "Leyenda precipitaciones",
+    "bottomright"
+  ) %>%
   addLayersControl(
     baseGroups = c("Precipitaciones", "Temperatura", "Var. precipitaciones", "Var. Temperatura"),
-    overlayGroups = c("Leyenda precipitaciones", "Leyenda Temperatura"),
+    overlayGroups = c("Leyenda precipitaciones", "Leyenda Temperatura", "Variación de precipitaciones", "Variación de temperatura"),
     options = layersControlOptions(collapsed = T, autoZIndex = TRUE)
   ) %>%
   addResetMapButton() %>% 
